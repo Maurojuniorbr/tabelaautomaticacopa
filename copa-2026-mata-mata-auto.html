@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copa do Mundo 2026 · Chaveamento do Mata-mata (Ao Vivo)</title>
+<style>
+  :root{
+    --bg:#ffffff;--ink:#1a1a2e;--muted:#8a8a99;--line:#e6e6ee;
+    --win-bg:#e1f5ee;--win-ink:#085041;--win-line:#5dcaa5;
+    --live-bg:#fdeceb;--live-ink:#b3261e;--gold:#caa64a;--gold-deep:#8a6d1f;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
+  header{text-align:center;padding:22px 16px 6px;}
+  header h1{margin:0;font-size:22px;font-weight:600;letter-spacing:.2px;}
+  header p{margin:4px 0 0;font-size:13px;color:var(--muted);}
+  .toolbar{display:flex;justify-content:center;align-items:center;gap:10px;padding:12px 16px 4px;flex-wrap:wrap;}
+  .toolbar button{font-size:13px;padding:7px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;color:#555;transition:background .12s,border-color .12s;}
+  .toolbar button:hover{background:#f6f6fa;border-color:#d2d2dc;}
+  .status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:#bbb;}
+  .dot.ok{background:#34c759;}
+  .dot.err{background:#ff3b30;}
+  .dot.load{background:#ffcc00;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  .scroll{overflow-x:auto;padding:6px 16px 36px;}
+  .bracket{display:grid;
+    grid-template-columns:minmax(146px,1fr) minmax(134px,.85fr) minmax(126px,.75fr) minmax(120px,.66fr) 138px minmax(120px,.66fr) minmax(126px,.75fr) minmax(134px,.85fr) minmax(146px,1fr);
+    gap:9px;align-items:stretch;min-width:1180px;max-width:1500px;margin:0 auto;}
+  .col{display:flex;flex-direction:column;justify-content:space-around;gap:7px;}
+  .col-head{text-align:center;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:5px;min-height:13px;}
+  .match{display:flex;flex-direction:column;gap:3px;flex:1;justify-content:center;position:relative;}
+  .team{display:flex;align-items:center;gap:7px;font-size:12px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;text-align:left;width:100%;white-space:nowrap;overflow:hidden;color:var(--ink);}
+  .col.right .team{flex-direction:row-reverse;text-align:right;}
+  .team img{width:22px;height:15px;object-fit:cover;border-radius:2px;flex-shrink:0;box-shadow:0 0 0 1px rgba(0,0,0,.05);}
+  .team .name{overflow:hidden;text-overflow:ellipsis;flex:1;}
+  .team .score{font-variant-numeric:tabular-nums;font-weight:600;font-size:12px;min-width:14px;text-align:center;color:var(--muted);}
+  .team.win{background:var(--win-bg);color:var(--win-ink);font-weight:600;border-color:var(--win-line);}
+  .team.win .score{color:var(--win-ink);}
+  .team.lose{opacity:.55;color:var(--muted);}
+  .team.empty{background:#fafafc;color:var(--muted);}
+  .team.empty img{display:none;}
+  .badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8px;font-weight:700;letter-spacing:.3px;padding:1px 5px;border-radius:6px;background:var(--live-bg);color:var(--live-ink);text-transform:uppercase;z-index:2;pointer-events:none;}
+
+  .cup{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:7px;}
+  .cup .ring{width:114px;height:114px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex-direction:column;background:#fff;transition:background .2s,border-color .2s;}
+  .cup.crowned .ring{border-color:var(--gold);background:linear-gradient(180deg,#fdf7e6,#faf0d2);}
+  .cup .trophy{font-size:34px;line-height:1;}
+  .cup .champ-flag{width:32px;height:21px;object-fit:cover;border-radius:3px;margin-top:5px;box-shadow:0 0 0 1px rgba(0,0,0,.08);}
+  .cup .champ-name{font-size:13px;font-weight:600;color:var(--gold-deep);margin-top:3px;min-height:16px;}
+  .cup .champ-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);}
+
+  footer{text-align:center;font-size:11px;color:var(--muted);padding:0 16px 24px;line-height:1.5;}
+  footer a{color:#6a6a99;}
+
+  @media print{
+    @page{size:A4 landscape;margin:8mm;}
+    html,body{width:100%;}
+    header{padding:0 0 4px;}header h1{font-size:16px;}header p{font-size:10px;}
+    .toolbar,footer{display:none !important;}
+    .scroll{overflow:visible;padding:0;}
+    .bracket{min-width:0;width:100%;max-width:100%;gap:5px;grid-template-columns:1fr .9fr .8fr .72fr 118px .72fr .8fr .9fr 1fr;}
+    .team{font-size:9px;padding:3px 5px;gap:5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .team img{width:17px;height:11px;}
+    .col-head{font-size:8px;margin-bottom:3px;}
+    .cup .ring{width:86px;height:86px;}.cup .trophy{font-size:26px;}
+    .cup .champ-flag{width:24px;height:16px;}.cup .champ-name{font-size:10px;}
+    .win,.lose,.crowned .ring,.badge{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Copa do Mundo 2026 · Mata-mata</h1>
+  <p>Placares atualizados automaticamente · vencedores avançam sozinhos</p>
+</header>
+<div class="toolbar">
+  <button id="refresh">↻ Atualizar agora</button>
+  <button id="print">⎙ Salvar PDF / Imprimir</button>
+  <span class="status"><span class="dot" id="dot"></span><span id="statusText">aguardando…</span></span>
+</div>
+<div class="scroll"><div class="bracket" id="bracket"></div></div>
+<footer>
+  Dados: <a href="https://github.com/openfootball/worldcup.json" target="_blank" rel="noopener">openfootball/worldcup.json</a> (domínio público, sem chave). Atualização manual da fonte ~1×/dia — não é tempo real ao minuto.<br>
+  Atualiza automaticamente a cada 5 min enquanto a página estiver aberta.
+</footer>
+
+<script>
+(function(){
+  const SRC="https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json";
+
+  // ISO codes for flagcdn (openfootball usa nomes em inglês)
+  const FLAG={
+    "South Africa":"za","Canada":"ca","Germany":"de","Paraguay":"py","Netherlands":"nl","Morocco":"ma",
+    "Brazil":"br","Japan":"jp","France":"fr","Sweden":"se","Ivory Coast":"ci","Norway":"no",
+    "Mexico":"mx","Ecuador":"ec","England":"gb-eng","DR Congo":"cd","USA":"us","United States":"us",
+    "Bosnia & Herzegovina":"ba","Bosnia and Herzegovina":"ba","Belgium":"be","Senegal":"sn",
+    "Portugal":"pt","Croatia":"hr","Spain":"es","Austria":"at","Switzerland":"ch","Algeria":"dz",
+    "Argentina":"ar","Cape Verde":"cv","Colombia":"co","Ghana":"gh","Australia":"au","Egypt":"eg"
+  };
+  // Nomes PT para exibição
+  const PT={
+    "South Africa":"África do Sul","Canada":"Canadá","Germany":"Alemanha","Paraguay":"Paraguai",
+    "Netherlands":"Holanda","Morocco":"Marrocos","Brazil":"Brasil","Japan":"Japão","France":"França",
+    "Sweden":"Suécia","Ivory Coast":"Costa do Marfim","Norway":"Noruega","Mexico":"México","Ecuador":"Equador",
+    "England":"Inglaterra","DR Congo":"RD Congo","USA":"Estados Unidos","United States":"Estados Unidos",
+    "Bosnia & Herzegovina":"Bósnia","Bosnia and Herzegovina":"Bósnia","Belgium":"Bélgica","Senegal":"Senegal",
+    "Portugal":"Portugal","Croatia":"Croácia","Spain":"Espanha","Austria":"Áustria","Switzerland":"Suíça",
+    "Algeria":"Argélia","Argentina":"Argentina","Cape Verde":"Cabo Verde","Colombia":"Colômbia","Ghana":"Gana",
+    "Australia":"Austrália","Egypt":"Egito"
+  };
+  function flag(n){const c=FLAG[n];return c?("https://flagcdn.com/"+c.toLowerCase()+".svg"):"";}
+  function pt(n){return PT[n]||n;}
+
+  // Estrutura oficial do bracket por número de jogo (openfootball num 73-104)
+  // Cada nó: [jogoA, jogoB] -> referencia o vencedor desses jogos (folhas = 16-avos)
+  const TREE={
+    89:[74,77],90:[73,75],91:[76,78],92:[79,80],93:[83,84],94:[81,82],95:[86,88],96:[85,87],
+    97:[89,90],98:[93,94],99:[91,92],100:[95,96],
+    101:[97,98],102:[99,100],104:[101,102]
+  };
+  // Ordem de exibição das colunas:
+  // Esquerda (subárvore semi 101): 16avos -> oitavas -> quartas -> semi
+  const LEFT={
+    r16:[74,77,73,75,83,84,81,82],
+    r8:[89,90,93,94],
+    qf:[97,98],
+    sf:[101]
+  };
+  const RIGHT={
+    r16:[76,78,79,80,86,88,85,87],
+    r8:[91,92,95,96],
+    qf:[99,100],
+    sf:[102]
+  };
+
+  let MATCHES={};   // num -> match object da API
+  let timer=null;
+
+  function setStatus(state,txt){
+    const dot=document.getElementById("dot");
+    dot.className="dot"+(state?(" "+state):"");
+    document.getElementById("statusText").textContent=txt;
+  }
+
+  // Resolve quem joga em determinado num (nome real ou null se indefinido)
+  function teamsOf(num){
+    const m=MATCHES[num];
+    if(!m) return [null,null,null,null,false]; // t1,t2,s1,s2,finished
+    function resolve(side){
+      const t=m["team"+side];
+      if(t && /^W\d+$/.test(t)){ return winnerOf(parseInt(t.slice(1))); }
+      return t||null;
+    }
+    const t1=resolve(1), t2=resolve(2);
+    const ft=m.score&&m.score.ft;
+    let s1=null,s2=null,finished=false;
+    if(ft && ft.length===2){ s1=ft[0];s2=ft[1];finished=true; }
+    return [t1,t2,s1,s2,finished];
+  }
+
+  // Vencedor de um jogo (considera pênaltis se houver campo 'pen' ou 'penalties')
+  function winnerOf(num){
+    const m=MATCHES[num];
+    if(!m) return null;
+    const [t1,t2,s1,s2,fin]=teamsOf(num);
+    if(!fin||t1==null||t2==null) return null;
+    if(s1>s2) return t1;
+    if(s2>s1) return t2;
+    // empate no tempo normal: tentar pênaltis
+    const pen=m.score&&(m.score.pen||m.score.penalties);
+    if(pen&&pen.length===2){ return pen[0]>pen[1]?t1:t2; }
+    return null; // empate sem desempate definido na fonte
+  }
+
+  function isLive(num){
+    const m=MATCHES[num];
+    if(!m) return false;
+    if(m.score&&m.score.ft) return false;
+    // openfootball normalmente só traz score quando termina; live raramente disponível
+    return false;
+  }
+
+  function makeTeamEl(name,score,state,side){
+    const el=document.createElement("div");
+    el.className="team"+(state?(" "+state):"");
+    if(!name){el.classList.add("empty");el.innerHTML='<span class="name">—</span>';return el;}
+    const img='<img src="'+flag(name)+'" alt="" loading="lazy">';
+    const nm='<span class="name">'+pt(name)+'</span>';
+    const sc='<span class="score">'+(score==null?'':score)+'</span>';
+    el.innerHTML = side==="right" ? (sc+nm+img) : (img+nm+sc);
+    return el;
+  }
+
+  function buildMatch(num){
+    const wrap=document.createElement("div");wrap.className="match";
+    const [t1,t2,s1,s2,fin]=teamsOf(num);
+    const w=winnerOf(num);
+    const side = LEFT_NUMS.has(num)?"left":"right";
+    let st1="",st2="";
+    if(fin&&w){ if(w===t1){st1="win";st2="lose";} else if(w===t2){st2="win";st1="lose";} }
+    wrap.appendChild(makeTeamEl(t1,s1,st1,side));
+    wrap.appendChild(makeTeamEl(t2,s2,st2,side));
+    return wrap;
+  }
+
+  const HEADS={r16:"16-avos",r8:"Oitavas",qf:"Quartas",sf:"Semi"};
+  const ORDER=["r16","r8","qf","sf"];
+  let LEFT_NUMS=new Set(), RIGHT_NUMS=new Set();
+  Object.values(LEFT).forEach(a=>a.forEach(n=>LEFT_NUMS.add(n)));
+  Object.values(RIGHT).forEach(a=>a.forEach(n=>RIGHT_NUMS.add(n)));
+
+  function buildColumn(sideObj,key,sideClass){
+    const col=document.createElement("div");col.className="col "+sideClass;
+    const h=document.createElement("div");h.className="col-head";h.textContent=HEADS[key];
+    col.appendChild(h);
+    sideObj[key].forEach(num=>col.appendChild(buildMatch(num)));
+    return col;
+  }
+
+  function buildCup(){
+    const col=document.createElement("div");col.className="col";
+    const h=document.createElement("div");h.className="col-head";h.textContent="Final";
+    col.appendChild(h);
+    const cup=document.createElement("div");cup.className="cup";
+    const [t1,t2,s1,s2,fin]=teamsOf(104);
+    const champ=winnerOf(104);
+    if(champ)cup.classList.add("crowned");
+    // finalista esquerdo (W101) e direito (W102)
+    const fL=makeTeamEl(t1,s1,champ?(champ===t1?"win":"lose"):"","left");
+    const fR=makeTeamEl(t2,s2,champ?(champ===t2?"win":"lose"):"","right");
+    const ring=document.createElement("div");ring.className="ring";
+    ring.innerHTML='<div class="trophy">🏆</div>'+
+      (champ?'<img class="champ-flag" src="'+flag(champ)+'" alt="">':'')+
+      '<div class="champ-name">'+(champ?pt(champ):'')+'</div>'+
+      '<div class="champ-label">'+(champ?'Campeão':'a definir')+'</div>';
+    cup.appendChild(fL);cup.appendChild(ring);cup.appendChild(fR);
+    col.appendChild(cup);
+    return col;
+  }
+
+  function render(){
+    const b=document.getElementById("bracket");b.innerHTML="";
+    ORDER.forEach(k=>b.appendChild(buildColumn(LEFT,k,"left")));
+    b.appendChild(buildCup());
+    ["sf","qf","r8","r16"].forEach(k=>b.appendChild(buildColumn(RIGHT,k,"right")));
+  }
+
+  async function load(){
+    setStatus("load","carregando dados…");
+    try{
+      const res=await fetch(SRC+"?t="+Date.now(),{cache:"no-store"});
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      const data=await res.json();
+      MATCHES={};
+      (data.matches||[]).forEach(m=>{ if(typeof m.num==="number") MATCHES[m.num]=m; });
+      render();
+      const now=new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+      setStatus("ok","atualizado às "+now);
+    }catch(e){
+      setStatus("err","sem conexão — usando dados em cache");
+      if(Object.keys(MATCHES).length) render();
+    }
+  }
+
+  document.getElementById("refresh").addEventListener("click",load);
+  document.getElementById("print").addEventListener("click",()=>window.print());
+
+  render(); // estrutura vazia imediata
+  load();   // primeira carga
+  timer=setInterval(load,5*60*1000); // a cada 5 min
+})();
+</script>
+</body>
+</html>
